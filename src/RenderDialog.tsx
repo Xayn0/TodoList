@@ -1,5 +1,6 @@
-import React from "react";
+import React, { useState } from "react";
 import type { TodoItem } from "./App";
+import { isDateValid } from "./date.lib";
 
 type User = {
   age: number;
@@ -33,7 +34,12 @@ RenderDialog({
 }
 
 function Dialog({ addTodo, close }: Props) {
-  
+  const [title, setTitle] = useState("");
+  const [description, setDescription] = useState("");
+  const [isDone, setIsDone] = useState(false);
+  const [deadline, setDeadline] = useState<Date | null>(null);
+
+  const isValid = Boolean(title) && Boolean(description) && Boolean(deadline);
   return (
     // Overlay
     <div className="fixed inset-0 bg-gray-600 bg-opacity-75 flex items-center justify-center z-50">
@@ -41,18 +47,16 @@ function Dialog({ addTodo, close }: Props) {
       <div className="bg-white p-6 rounded-lg shadow-xl max-w-sm w-full relative">
         <form
           className="space-y-4" // Tailwind: Adds vertical spacing between form elements
-          onSubmit={(ev) => {
-            ev.preventDefault();
-            const formData = new FormData(ev.target as HTMLFormElement);
+          onSubmit={() => {
+            if (!isValid || deadline === null) return;
 
-            const todoItem: TodoItem = {
-              title: formData.get("title") as string,
-              description: formData.get("description") as string,
-              deadline: new Date(formData.get("deadline") as string),
-              isDone: formData.get("isDone") === "on",
+            const task: TodoItem = {
+              deadline,
+              title,
+              description,
+              isDone,
             };
-
-            addTodo(todoItem);
+            addTodo(task);
             close();
           }}
         >
@@ -60,34 +64,25 @@ function Dialog({ addTodo, close }: Props) {
 
           {/* Input for Title */}
           <div>
-            <label
-              htmlFor="dialog-title"
-              className="block text-sm font-medium text-gray-700"
-            >
+            <label className="block text-sm font-medium text-gray-700">
               Title
+              <input
+                type="text"
+                className="mt-1 block w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-blue-500 focus:border-blue-500 sm:text-sm"
+                onChange={(e) => setTitle(e.target.value)}
+              />
             </label>
-            <input
-              type="text"
-              id="dialog-title"
-              className="mt-1 block w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-blue-500 focus:border-blue-500 sm:text-sm"
-              name="title"
-              required
-            />
           </div>
 
           {/* Input for Description */}
           <div>
-            <label
-              htmlFor="dialog-description"
-              className="block text-sm font-medium text-gray-700"
-            >
+            <label className="block text-sm font-medium text-gray-700">
               Description
+              <textarea
+                className="mt-1 block w-full h-36 px-3 py-2 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-blue-500 focus:border-blue-500 sm:text-sm"
+                onChange={(e) => setDescription(e.target.value)}
+              />
             </label>
-            <textarea
-              id="dialog-description"
-              className="mt-1 block w-full h-36 px-3 py-2 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-blue-500 focus:border-blue-500 sm:text-sm"
-              name="description"
-            />
           </div>
 
           {/* Input for Deadline */}
@@ -97,7 +92,11 @@ function Dialog({ addTodo, close }: Props) {
               <input
                 type="date" // Use type="date" for better UX
                 className="mt-1 block w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-blue-500 focus:border-blue-500 sm:text-sm"
-                name="deadline"
+                onChange={(e) => {
+                  const date = new Date(e.target.value);
+
+                  setDeadline(isDateValid(date) ? date : null);
+                }}
               />
             </label>
           </div>
@@ -108,7 +107,7 @@ function Dialog({ addTodo, close }: Props) {
               <input
                 type="checkbox"
                 className="h-4 w-4 text-blue-600 focus:ring-blue-500 border-gray-300 rounded"
-                name="isDone"
+                onChange={(e) => setIsDone(e.target.checked)}
               />
               Is Done?
             </label>
@@ -116,11 +115,12 @@ function Dialog({ addTodo, close }: Props) {
 
           {/* Submit Button */}
           <div className="flex justify-end mt-6">
-            <input
-              type="submit"
-              value="Save Todo" // Text for the button
-              className="px-4 py-2 bg-blue-600 text-white font-semibold rounded-md hover:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-blue-500 cursor-pointer"
-            />
+            <button
+              disabled={!isValid}
+              className="px-4 py-2 bg-blue-600 text-white font-semibold rounded-md hover:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-blue-500 cursor-pointer disabled:bg-blue-500 disabled:cursor-not-allowed"
+            >
+              Add ToDo
+            </button>
           </div>
         </form>
       </div>

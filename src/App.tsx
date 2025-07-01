@@ -91,7 +91,7 @@ function App() {
       })}
       {isDialogOpen && (
         <Dialog
-          addTodo={(newTodo: TodoItem) => setTodos([...todoList, newTodo])}
+          addTodo={(newTodo) => setTodos([...todoList, newTodo])}
           close={() => setIsDialogOpen(false)}
         />
       )}
