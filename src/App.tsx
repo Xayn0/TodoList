@@ -1,7 +1,7 @@
 import React, { useState, useEffect } from "react";
 // import "./App.css";
 import css from "./style.module.css";
-import Dialog from "./RenderDialog";
+import {Dialog} from "./RenderDialog";
 
 export type TodoItem = {
   title: string;

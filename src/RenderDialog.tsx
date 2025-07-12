@@ -32,8 +32,11 @@ RenderDialog({
   isOpen,
 }); */
 }
-
-function Dialog({ addTodo, close }: Props) {
+{/* <Input type = {oneline} />
+<Input type = {multiple} />
+<Input type = {date} />
+<Input type = {done} /> */}
+export function Dialog({ addTodo, close }: Props) {
   const [title, setTitle] = useState("");
   const [description, setDescription] = useState("");
   const [isDone, setIsDone] = useState(false);
@@ -128,4 +131,3 @@ function Dialog({ addTodo, close }: Props) {
   );
 }
 
-export default Dialog;
