@@ -26,5 +26,20 @@
   "profile": {
     "name": "typicode"
   },
-  "todos": []
+  "todos": [
+    {
+      "id": "4ce2",
+      "deadline": "2027-01-30T00:00:00.000Z",
+      "title": "c123",
+      "description": "c321",
+      "isDone": true
+    },
+    {
+      "id": "3518",
+      "deadline": "2025-07-13T00:00:00.000Z",
+      "title": "xghddg",
+      "description": "dghgh",
+      "isDone": true
+    }
+  ]
 }

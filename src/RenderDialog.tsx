@@ -24,6 +24,7 @@ const user = {
 type Props = {
   addTodo: (todo: TodoItem) => void;
   close: () => void;
+  initialTodo: TodoItem | undefined;
 };
 
 {
@@ -38,11 +39,18 @@ RenderDialog({
 <Input type = {date} />
 <Input type = {done} /> */
 }
-export function Dialog({ addTodo, close }: Props) {
-  const [title, setTitle] = useState("");
-  const [description, setDescription] = useState("");
-  const [isDone, setIsDone] = useState(false);
-  const [deadline, setDeadline] = useState<Date | null>(null);
+
+export function Dialog({ addTodo, close, initialTodo }: Props) {
+  const [title, setTitle] = useState(initialTodo?.title ?? "");
+  const [description, setDescription] = useState(
+    initialTodo?.description ?? ""
+  );
+  const [isDone, setIsDone] = useState(initialTodo?.isDone ?? false);
+  const [deadline, setDeadline] = useState<Date | null>(
+    initialTodo?.deadline ?? null
+  );
+
+  const isEditing = Boolean(initialTodo)
 
   const isValid = Boolean(title) && Boolean(description) && Boolean(deadline);
   return (
@@ -53,7 +61,7 @@ export function Dialog({ addTodo, close }: Props) {
         <form
           className="space-y-4" // Tailwind: Adds vertical spacing between form elements
           onSubmit={(e) => {
-            e.preventDefault()
+            e.preventDefault();
           }}
         >
           <h2 className="text-2xl font-bold mb-4 text-cEnter">Add New Todo</h2>
@@ -63,6 +71,7 @@ export function Dialog({ addTodo, close }: Props) {
             <label className="block text-sm font-medium text-gray-700">
               Title
               <input
+                value={title}
                 type="text"
                 className="mt-1 block w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-blue-500 focus:border-blue-500 sm:text-sm"
                 onChange={(e) => setTitle(e.target.value)}
@@ -75,6 +84,7 @@ export function Dialog({ addTodo, close }: Props) {
             <label className="block text-sm font-medium text-gray-700">
               Description
               <textarea
+                value={description}
                 className="mt-1 block w-full h-36 px-3 py-2 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-blue-500 focus:border-blue-500 sm:text-sm"
                 onChange={(e) => setDescription(e.target.value)}
               />
@@ -86,6 +96,7 @@ export function Dialog({ addTodo, close }: Props) {
             <label className="block text-sm font-medium text-gray-700">
               Deadline
               <input
+                value={deadline ? toDateString(new Date(deadline)) : undefined}
                 type="date" // Use type="date" for better UX
                 className="mt-1 block w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-blue-500 focus:border-blue-500 sm:text-sm"
                 onChange={(e) => {
@@ -101,6 +112,7 @@ export function Dialog({ addTodo, close }: Props) {
           <div className="flex items-center">
             <label className="ml-2 block text-sm text-gray-900 flex items-center gap-1">
               <input
+                checked={isDone}
                 type="checkbox"
                 className="h-4 w-4 text-blue-600 focus:ring-blue-500 border-gray-300 rounded"
                 onChange={(e) => setIsDone(e.target.checked)}
@@ -120,6 +132,7 @@ export function Dialog({ addTodo, close }: Props) {
                 if (!isValid || deadline === null) return;
 
                 const task: TodoItem = {
+                  id: initialTodo?.id ?? undefined as any as string,
                   deadline,
                   title,
                   description,
@@ -127,8 +140,12 @@ export function Dialog({ addTodo, close }: Props) {
                 };
                 // addTodo(task);
 
-                fetch("http://localhost:3000/todos", {
-                  method: "POST",
+                isEditing ?
+                fetch(`http://localhost:3000/todos/${task.id}`, {
+                  method:"PATCH",
+                  body: JSON.stringify(task),
+                }) : fetch("http://localhost:3000/todos", {
+                  method:"POST",
                   body: JSON.stringify(task),
                 });
 
@@ -136,11 +153,17 @@ export function Dialog({ addTodo, close }: Props) {
               }}
               className="px-4 py-2 bg-blue-600 text-white font-semibold rounded-md hover:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-blue-500 cursor-pointer disabled:bg-blue-500 disabled:cursor-not-allowed"
             >
-              Add ToDo
+              {isEditing ? "Confirm" : "Add Todo"}
             </button>
           </div>
         </form>
       </div>
     </div>
   );
+}
+
+function toDateString(date: Date) {
+  return `${date.getFullYear()}-${(date.getMonth() + 1)
+    .toString()
+    .padStart(2, "0")}-${date.getDate()}`;
 }

@@ -13,6 +13,8 @@ export type TodoItem = {
 
 type TodoViewProps = {
   data: TodoItem;
+  setIsDialogOpen: (isOpen: boolean) => void;
+  setOpenedTodoId: (id: string | null) => void;
 };
 
 function TodoView(props: TodoViewProps) {
@@ -41,18 +43,23 @@ function TodoView(props: TodoViewProps) {
         {" "}
         DELETE TODO
       </button>
+      <button
+        onClick={() => {
+          props.setIsDialogOpen(true);
+          props.setOpenedTodoId(props.data.id);
+        }}
+      >
+        Edit
+      </button>
     </div>
   );
 }
 
-const getSeven1 = () => 7;
-const getSeven2 = () => {
-  return 7;
-};
-
 function App() {
   const [isDialogOpen, setIsDialogOpen] = useState(false);
+  const [openedTodoId, setOpenedTodoId] = useState<string | null>(null);
   const [todoList, setTodos] = useState<TodoItem[]>([]);
+
 
   useEffect(() => {
     fetch("http://localhost:3000/todos")
@@ -70,10 +77,17 @@ function App() {
       </button>
       {todoList.map((item) => {
         // To read about the keys
-        return <TodoView data={item} />;
+        return (
+          <TodoView
+            data={item}
+            setIsDialogOpen={setIsDialogOpen}
+            setOpenedTodoId={setOpenedTodoId}
+          />
+        );
       })}
       {isDialogOpen && (
         <Dialog
+          initialTodo={todoList.find((x) => x.id === openedTodoId)}
           addTodo={(newTodo) => setTodos([...todoList, newTodo])}
           close={() => setIsDialogOpen(false)}
         />
